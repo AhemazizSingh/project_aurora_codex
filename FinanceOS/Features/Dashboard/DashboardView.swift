@@ -47,6 +47,7 @@ struct DashboardView: View {
                     }
                 }
                 ToolbarItemGroup(placement: .topBarTrailing) {
+                    NavigationLink { SearchView() } label: { Image(systemName: "magnifyingglass") }.accessibilityLabel("Search")
                     NavigationLink { AnalyticsView() } label: { Image(systemName: "chart.bar.xaxis") }.accessibilityLabel("Analytics")
                     NavigationLink { AccountsView() } label: { Image(systemName: "building.columns") }.accessibilityLabel("Accounts")
                 }
