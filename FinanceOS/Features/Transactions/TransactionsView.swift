@@ -100,14 +100,14 @@ private struct TransactionRow: View {
     }
 }
 
-private struct AddTransactionView: View {
+struct AddTransactionView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @AppStorage("financeos.currencyCode") private var currencyCode = "INR"
     @Query(sort: \Account.name) private var accounts: [Account]
     @Query(sort: \Category.name) private var categories: [Category]
     @Query(sort: \TransactionLabel.name) private var labels: [TransactionLabel]
-    @State private var type: TransactionType = .expense
+    @State private var type: TransactionType
     @State private var amountText = ""
     @State private var sourceAccountID: UUID?
     @State private var destinationAccountID: UUID?
@@ -117,6 +117,10 @@ private struct AddTransactionView: View {
     @State private var notes = ""
     @State private var errorMessage: String?
     private let service = TransactionService()
+
+    init(initialType: TransactionType = .expense) {
+        _type = State(initialValue: initialType)
+    }
 
     private var activeAccounts: [Account] { accounts.filter { !$0.isArchived } }
     private var sourceAccount: Account? { activeAccounts.first { $0.id == sourceAccountID } }
