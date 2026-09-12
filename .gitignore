@@ -1,0 +1,10 @@
+DerivedData/
+build/
+*.xcuserstate
+xcuserdata/
+.DS_Store
+
+# Inherited local-workspace artifacts; not part of the iOS app.
+.replit
+replit.md
+Agents.md
