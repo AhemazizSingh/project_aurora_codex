@@ -17,6 +17,7 @@ final class FinancialTransaction {
     var destinationAccount: Account?
     var category: Category?
     var labels: [TransactionLabel] = []
+    var goal: Goal?
 
     init(id: UUID = UUID(), type: TransactionType, amount: Decimal, currencyCode: String = "INR", date: Date = .now, notes: String = "") {
         self.id = id

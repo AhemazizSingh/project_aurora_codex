@@ -18,6 +18,8 @@ struct DashboardView: View {
                             .accessibilityLabel("Categories")
                         NavigationLink { LabelsView() } label: { Image(systemName: "tag") }
                             .accessibilityLabel("Labels")
+                        NavigationLink { GoalsView() } label: { Image(systemName: "target") }
+                            .accessibilityLabel("Goals")
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
