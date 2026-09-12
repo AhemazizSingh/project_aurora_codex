@@ -8,7 +8,10 @@ final class PersistenceController {
     private init(inMemory: Bool = false) {
         let schema = Schema([Account.self, Category.self, FinancialTransaction.self])
         let configuration = ModelConfiguration("FinanceOS", schema: schema, isStoredInMemoryOnly: inMemory)
-        do { container = try ModelContainer(for: schema, configurations: [configuration]) }
+        do {
+            container = try ModelContainer(for: schema, configurations: [configuration])
+            try DefaultCategorySeeder.seedIfNeeded(in: container.mainContext)
+        }
         catch { fatalError("Unable to create the FinanceOS data store: \(error)") }
     }
 

@@ -61,6 +61,21 @@ final class TransactionEngine {
         transaction.updatedAt = .now
     }
 
+    func reverse(_ transaction: FinancialTransaction) {
+        let amount = transaction.amount
+        switch transaction.type {
+        case .expense: credit(transaction.sourceAccount, by: amount)
+        case .income, .refund, .interest, .dividend, .adjustment: debit(transaction.destinationAccount, by: amount)
+        case .savings, .investment, .transfer:
+            credit(transaction.sourceAccount, by: amount)
+            debit(transaction.destinationAccount, by: amount)
+        case .loan:
+            credit(transaction.sourceAccount, by: amount)
+            debit(transaction.destinationAccount, by: amount)
+        }
+        transaction.updatedAt = .now
+    }
+
     /// Debiting an asset reduces it; debiting a liability increases money owed.
     private func debit(_ account: Account?, by amount: Decimal) {
         guard let account else { return }
