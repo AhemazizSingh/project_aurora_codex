@@ -52,6 +52,7 @@ struct DashboardView: View {
                     NavigationLink { AnalyticsView() } label: { Image(systemName: "chart.bar.xaxis") }.accessibilityLabel("Analytics")
                     NavigationLink { AccountsView() } label: { Image(systemName: "building.columns") }.accessibilityLabel("Accounts")
                     NavigationLink { SettingsView() } label: { Image(systemName: "gearshape") }.accessibilityLabel("Settings")
+                    NavigationLink { TimelineView() } label: { Image(systemName: "clock.arrow.circlepath") }.accessibilityLabel("Timeline")
                 }
             }
         }
