@@ -6,6 +6,7 @@ struct DashboardView: View {
     @Query(sort: \FinancialTransaction.date, order: .reverse) private var transactions: [FinancialTransaction]
     @Query(sort: \Budget.createdAt, order: .reverse) private var budgets: [Budget]
     @Query(sort: \Goal.deadline) private var goals: [Goal]
+    @AppStorage("financeos.privacyMode") private var privacyMode = false
 
     private var insights: [FinancialInsight] { InsightEngine.generate(budgets: budgets, goals: goals, transactions: transactions) }
 
@@ -50,6 +51,7 @@ struct DashboardView: View {
                     NavigationLink { SearchView() } label: { Image(systemName: "magnifyingglass") }.accessibilityLabel("Search")
                     NavigationLink { AnalyticsView() } label: { Image(systemName: "chart.bar.xaxis") }.accessibilityLabel("Analytics")
                     NavigationLink { AccountsView() } label: { Image(systemName: "building.columns") }.accessibilityLabel("Accounts")
+                    NavigationLink { SettingsView() } label: { Image(systemName: "gearshape") }.accessibilityLabel("Settings")
                 }
             }
         }
@@ -58,7 +60,7 @@ struct DashboardView: View {
     private var hero: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Net Worth").font(.subheadline.weight(.medium)).foregroundStyle(AppTheme.textSecondary)
-            Text(AnalyticsCurrency.string(AnalyticsService.summary(accounts: accounts, transactions: transactions).netWorth)).font(.system(size: 38, weight: .bold, design: .rounded)).monospacedDigit()
+            Text(privacyMode ? "••••••" : AnalyticsCurrency.string(AnalyticsService.summary(accounts: accounts, transactions: transactions).netWorth)).font(.system(size: 38, weight: .bold, design: .rounded)).monospacedDigit()
             Text("Your assets minus liabilities").font(.caption).foregroundStyle(AppTheme.textSecondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading).padding(24).background(AppTheme.surface, in: RoundedRectangle(cornerRadius: 28, style: .continuous)).padding(.horizontal, 24)
@@ -67,10 +69,10 @@ struct DashboardView: View {
 
     private var summaryGrid: some View {
         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-            DashboardMetric(title: "Income", amount: summary.income, color: AppTheme.income, icon: "arrow.down.circle.fill")
-            DashboardMetric(title: "Expenses", amount: summary.expenses, color: AppTheme.expense, icon: "arrow.up.circle.fill")
-            DashboardMetric(title: "Savings", amount: summary.savings, color: AppTheme.primary, icon: "banknote.fill")
-            DashboardMetric(title: "Investments", amount: summary.investments, color: .purple, icon: "chart.line.uptrend.xyaxis")
+            DashboardMetric(title: "Income", amount: summary.income, color: AppTheme.income, icon: "arrow.down.circle.fill", hidesBalance: privacyMode)
+            DashboardMetric(title: "Expenses", amount: summary.expenses, color: AppTheme.expense, icon: "arrow.up.circle.fill", hidesBalance: privacyMode)
+            DashboardMetric(title: "Savings", amount: summary.savings, color: AppTheme.primary, icon: "banknote.fill", hidesBalance: privacyMode)
+            DashboardMetric(title: "Investments", amount: summary.investments, color: .purple, icon: "chart.line.uptrend.xyaxis", hidesBalance: privacyMode)
         }
     }
 
@@ -105,9 +107,9 @@ struct DashboardView: View {
 }
 
 private struct DashboardMetric: View {
-    let title: String; let amount: Decimal; let color: Color; let icon: String
+    let title: String; let amount: Decimal; let color: Color; let icon: String; let hidesBalance: Bool
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) { Image(systemName: icon).foregroundStyle(color); Text(title).font(.caption).foregroundStyle(AppTheme.textSecondary); Text(AnalyticsCurrency.string(amount)).font(.headline.monospacedDigit()).foregroundStyle(color) }
+        VStack(alignment: .leading, spacing: 8) { Image(systemName: icon).foregroundStyle(color); Text(title).font(.caption).foregroundStyle(AppTheme.textSecondary); Text(hidesBalance ? "••••" : AnalyticsCurrency.string(amount)).font(.headline.monospacedDigit()).foregroundStyle(color) }
             .frame(maxWidth: .infinity, alignment: .leading).padding(16).background(AppTheme.surface, in: RoundedRectangle(cornerRadius: AppTheme.cardRadius, style: .continuous)).accessibilityElement(children: .combine)
     }
 }
