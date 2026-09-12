@@ -14,6 +14,10 @@ struct CSVImportRow: Identifiable {
     let labelNames: [String]
 }
 
+struct CSVImportRowErrors: Error {
+    let messages: [String]
+}
+
 enum CSVImportParseError: LocalizedError {
     case emptyFile
     case missingColumns([String])
@@ -30,7 +34,7 @@ enum CSVImportParser {
     private static let requiredHeaders = ["Date", "Type", "Amount"]
     private static let dateFormatter = ISO8601DateFormatter()
 
-    static func parse(_ text: String) throws -> Result<[CSVImportRow], [String]> {
+    static func parse(_ text: String) throws -> Result<[CSVImportRow], CSVImportRowErrors> {
         let lines = text.split(whereSeparator: \.isNewline).map(String.init)
         guard let headerLine = lines.first else { throw CSVImportParseError.emptyFile }
         let headers = fields(in: headerLine).map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
@@ -48,7 +52,7 @@ enum CSVImportParser {
             guard let date = dateFormatter.date(from: value("Date")) else { errors.append("Row \(lineNumber): date must be ISO-8601, for example 2026-09-13T10:30:00Z."); continue }
             rows.append(CSVImportRow(lineNumber: lineNumber, type: type, amount: amount, currencyCode: value("Currency").isEmpty ? "INR" : value("Currency"), date: date, sourceAccountName: value("From Account"), destinationAccountName: value("To Account"), categoryName: value("Category"), notes: value("Notes"), labelNames: value("Labels").split(separator: ";").map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty }))
         }
-        return errors.isEmpty ? .success(rows) : .failure(errors)
+        return errors.isEmpty ? .success(rows) : .failure(CSVImportRowErrors(messages: errors))
     }
 
     private static func fields(in line: String) -> [String] {

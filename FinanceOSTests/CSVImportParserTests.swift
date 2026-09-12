@@ -21,6 +21,6 @@ final class CSVImportParserTests: XCTestCase {
         let result = try CSVImportParser.parse(csv)
 
         guard case let .failure(errors) = result else { return XCTFail("Expected row errors") }
-        XCTAssertEqual(errors.count, 2)
+        XCTAssertEqual(errors.messages.count, 2)
     }
 }

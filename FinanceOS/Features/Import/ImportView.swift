@@ -48,7 +48,7 @@ struct ImportView: View {
         do {
             let url = try result.get(); let accessed = url.startAccessingSecurityScopedResource(); defer { if accessed { url.stopAccessingSecurityScopedResource() } }
             let text = try String(contentsOf: url, encoding: .utf8)
-            switch try CSVImportParser.parse(text) { case let .success(parsed): rows = parsed; messages = service.validationMessages(for: parsed, accounts: accounts, categories: categories, existing: transactions); case let .failure(errors): rows = []; messages = errors }
+            switch try CSVImportParser.parse(text) { case let .success(parsed): rows = parsed; messages = service.validationMessages(for: parsed, accounts: accounts, categories: categories, existing: transactions); case let .failure(errors): rows = []; messages = errors.messages }
         } catch { rows = []; messages = []; alertMessage = error.localizedDescription }
     }
 
