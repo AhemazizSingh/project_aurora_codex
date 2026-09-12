@@ -8,6 +8,9 @@ The first module establishes the SwiftUI/SwiftData foundation and transaction
 engine. Its business rules preserve the core financial distinction between
 expenses, transfers, savings, investments, refunds, and loans.
 
+The next module is onboarding: an accessible first-launch flow that persists a
+user’s theme and currency preferences, then saves their first account locally.
+
 ## Remote validation
 
 This repository includes an optional GitHub Actions workflow that generates the
