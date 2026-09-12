@@ -20,6 +20,8 @@ struct DashboardView: View {
                             .accessibilityLabel("Labels")
                         NavigationLink { GoalsView() } label: { Image(systemName: "target") }
                             .accessibilityLabel("Goals")
+                        NavigationLink { BudgetsView() } label: { Image(systemName: "chart.pie") }
+                            .accessibilityLabel("Budgets")
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {

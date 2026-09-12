@@ -6,7 +6,7 @@ final class PersistenceController {
     let container: ModelContainer
 
     private init(inMemory: Bool = false) {
-        let schema = Schema([Account.self, Category.self, TransactionLabel.self, Goal.self, FinancialTransaction.self])
+        let schema = Schema([Account.self, Category.self, TransactionLabel.self, Goal.self, Budget.self, FinancialTransaction.self])
         let configuration = ModelConfiguration("FinanceOS", schema: schema, isStoredInMemoryOnly: inMemory)
         do {
             container = try ModelContainer(for: schema, configurations: [configuration])

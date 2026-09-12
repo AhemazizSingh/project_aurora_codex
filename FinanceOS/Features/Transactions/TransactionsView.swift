@@ -142,7 +142,7 @@ private struct AddTransactionView: View {
                 if needsDestination {
                     accountPicker("To account", selection: $destinationAccountID, accounts: allowedDestinationAccounts)
                 }
-                if type == .expense {
+                if type == .expense || type == .refund {
                     Section("Category") {
                         Picker("Category", selection: $categoryID) {
                             Text("Choose category").tag(UUID?.none)
