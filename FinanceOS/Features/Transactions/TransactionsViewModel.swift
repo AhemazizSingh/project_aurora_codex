@@ -6,6 +6,8 @@ final class TransactionsViewModel: ObservableObject {
     @Published var showsAddTransaction = false
     @Published var undoableTransaction: FinancialTransaction?
     @Published var editingTransaction: FinancialTransaction?
+    @Published var filter = TransactionFilter()
+    @Published var showsFilters = false
     @Published var errorMessage: String?
     private let service = TransactionService()
 

@@ -6,7 +6,7 @@ struct TransactionsView: View {
     @Query(sort: \FinancialTransaction.date, order: .reverse) private var transactions: [FinancialTransaction]
     @StateObject private var viewModel = TransactionsViewModel()
 
-    private var activeTransactions: [FinancialTransaction] { transactions.filter(\.isActive) }
+    private var activeTransactions: [FinancialTransaction] { viewModel.filter.apply(to: transactions) }
 
     var body: some View {
         List {
@@ -34,6 +34,10 @@ struct TransactionsView: View {
         .background(AppTheme.background)
         .navigationTitle("Transactions")
         .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button { viewModel.showsFilters = true } label: { Image(systemName: "line.3.horizontal.decrease.circle") }
+                    .accessibilityLabel("Filter and sort transactions")
+            }
             ToolbarItem(placement: .topBarTrailing) {
                 Button { viewModel.showsAddTransaction = true } label: { Image(systemName: "plus") }
                     .accessibilityLabel("Add transaction")
@@ -44,6 +48,7 @@ struct TransactionsView: View {
                 .padding(.horizontal, 24).padding(.vertical, 12).background(.ultraThinMaterial)
         }
         .sheet(isPresented: $viewModel.showsAddTransaction) { AddTransactionView() }
+        .sheet(isPresented: $viewModel.showsFilters) { TransactionFilterView(filter: $viewModel.filter) }
         .sheet(item: $viewModel.editingTransaction) { transaction in AddTransactionView(transaction: transaction) }
         .alert("Something needs attention", isPresented: Binding(get: { viewModel.errorMessage != nil }, set: { if !$0 { viewModel.errorMessage = nil } })) {
             Button("OK", role: .cancel) { viewModel.errorMessage = nil }
@@ -62,6 +67,42 @@ struct TransactionsView: View {
                     try? await Task.sleep(for: .seconds(10))
                     viewModel.undoableTransaction = nil
                 }
+            }
+        }
+    }
+}
+
+private struct TransactionFilterView: View {
+    @Environment(\.dismiss) private var dismiss
+    @Query(sort: \Account.name) private var accounts: [Account]
+    @Query(sort: \Category.name) private var categories: [Category]
+    @Binding var filter: TransactionFilter
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Filter") {
+                    Picker("Type", selection: $filter.type) {
+                        Text("All types").tag(TransactionType?.none)
+                        ForEach(TransactionType.allCases) { Text($0.displayName).tag(Optional($0)) }
+                    }
+                    Picker("Account", selection: $filter.accountID) {
+                        Text("All accounts").tag(UUID?.none)
+                        ForEach(accounts.filter { !$0.isArchived }, id: \.id) { Text($0.name).tag(Optional($0.id)) }
+                    }
+                    Picker("Category", selection: $filter.categoryID) {
+                        Text("All categories").tag(UUID?.none)
+                        ForEach(categories.filter { !$0.isArchived }, id: \.id) { Text($0.name).tag(Optional($0.id)) }
+                    }
+                }
+                Section("Sort") {
+                    Picker("Order", selection: $filter.sortOrder) { ForEach(TransactionSortOrder.allCases) { Text($0.displayName).tag($0) } }
+                }
+            }
+            .navigationTitle("Filter Transactions")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("Reset") { filter = TransactionFilter() } }
+                ToolbarItem(placement: .confirmationAction) { Button("Done", action: dismiss.callAsFunction).fontWeight(.semibold) }
             }
         }
     }
