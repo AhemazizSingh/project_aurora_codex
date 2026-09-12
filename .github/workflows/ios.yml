@@ -1,12 +1,13 @@
 name: iOS validation
 
 on:
-  push:
-    branches: [main]
-  pull_request:
+  workflow_dispatch:
 
 jobs:
   build-and-test:
+    # Disabled by default to guarantee no GitHub Actions usage or cost.
+    # Enable only when macOS validation is explicitly wanted.
+    if: vars.ENABLE_REMOTE_IOS_VALIDATION == 'true'
     runs-on: macos-15
     timeout-minutes: 20
     steps:

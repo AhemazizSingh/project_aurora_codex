@@ -10,9 +10,10 @@ expenses, transfers, savings, investments, refunds, and loans.
 
 ## Remote validation
 
-This repository uses GitHub Actions on macOS to generate the Xcode project and
-run the Foundation unit tests. This enables compilation and simulator testing
-without a local Mac.
+This repository includes an optional GitHub Actions workflow that generates the
+Xcode project and runs Foundation tests on macOS. It is disabled by default, so
+it consumes no GitHub Actions minutes. Enable it only when macOS validation is
+explicitly wanted.
 
 ## Development
 
