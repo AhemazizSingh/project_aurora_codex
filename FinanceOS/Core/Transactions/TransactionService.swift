@@ -15,12 +15,14 @@ final class TransactionService {
         sourceAccount: Account?,
         destinationAccount: Account?,
         category: Category?,
+        labels: [TransactionLabel] = [],
         in context: ModelContext
     ) throws {
         let transaction = FinancialTransaction(type: type, amount: amount, currencyCode: currencyCode, date: date, notes: notes)
         transaction.sourceAccount = sourceAccount
         transaction.destinationAccount = destinationAccount
         transaction.category = category
+        transaction.labels = labels
         try engine.apply(transaction)
         context.insert(transaction)
         do {

@@ -16,6 +16,8 @@ struct DashboardView: View {
                             .accessibilityLabel("Transactions")
                         NavigationLink { CategoriesView() } label: { Image(systemName: "square.grid.2x2") }
                             .accessibilityLabel("Categories")
+                        NavigationLink { LabelsView() } label: { Image(systemName: "tag") }
+                            .accessibilityLabel("Labels")
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {

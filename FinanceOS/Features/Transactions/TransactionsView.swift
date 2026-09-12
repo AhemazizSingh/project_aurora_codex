@@ -73,6 +73,18 @@ private struct TransactionRow: View {
                 Text(transaction.category?.name ?? transaction.type.displayName).font(.body.weight(.semibold))
                 Text("\(accountName) · \(transaction.date.formatted(date: .abbreviated, time: .shortened))")
                     .font(.caption).foregroundStyle(AppTheme.textSecondary)
+                if !transaction.labels.isEmpty {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 4) {
+                            ForEach(transaction.labels, id: \.id) { label in
+                                Text(label.name)
+                                    .font(.caption2.weight(.medium))
+                                    .padding(.horizontal, 6).padding(.vertical, 2)
+                                    .background(AppTheme.primary.opacity(0.15), in: Capsule())
+                            }
+                        }
+                    }
+                }
             }
             Spacer()
             Text(signedAmount)
@@ -94,11 +106,13 @@ private struct AddTransactionView: View {
     @AppStorage("financeos.currencyCode") private var currencyCode = "INR"
     @Query(sort: \Account.name) private var accounts: [Account]
     @Query(sort: \Category.name) private var categories: [Category]
+    @Query(sort: \TransactionLabel.name) private var labels: [TransactionLabel]
     @State private var type: TransactionType = .expense
     @State private var amountText = ""
     @State private var sourceAccountID: UUID?
     @State private var destinationAccountID: UUID?
     @State private var categoryID: UUID?
+    @State private var selectedLabelIDs = Set<UUID>()
     @State private var date = Date.now
     @State private var notes = ""
     @State private var errorMessage: String?
@@ -133,6 +147,19 @@ private struct AddTransactionView: View {
                         Picker("Category", selection: $categoryID) {
                             Text("Choose category").tag(UUID?.none)
                             ForEach(categories.filter { !$0.isArchived }, id: \.id) { category in Text(category.name).tag(Optional(category.id)) }
+                        }
+                    }
+                }
+                if !labels.filter({ !$0.isArchived }).isEmpty {
+                    Section("Labels") {
+                        ForEach(labels.filter { !$0.isArchived }, id: \.id) { label in
+                            Toggle(label.name, isOn: Binding(
+                                get: { selectedLabelIDs.contains(label.id) },
+                                set: { isSelected in
+                                    if isSelected { selectedLabelIDs.insert(label.id) }
+                                    else { selectedLabelIDs.remove(label.id) }
+                                }
+                            ))
                         }
                     }
                 }
@@ -176,7 +203,8 @@ private struct AddTransactionView: View {
     private func save() {
         let amount = Decimal(string: amountText) ?? 0
         do {
-            try service.create(type: type, amount: amount, currencyCode: currencyCode, date: date, notes: notes, sourceAccount: sourceAccount, destinationAccount: destinationAccount, category: category, in: modelContext)
+            let selectedLabels = labels.filter { selectedLabelIDs.contains($0.id) }
+            try service.create(type: type, amount: amount, currencyCode: currencyCode, date: date, notes: notes, sourceAccount: sourceAccount, destinationAccount: destinationAccount, category: category, labels: selectedLabels, in: modelContext)
             dismiss()
         } catch {
             errorMessage = error.localizedDescription
