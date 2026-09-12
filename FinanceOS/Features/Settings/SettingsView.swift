@@ -30,6 +30,7 @@ struct SettingsView: View {
                 NavigationLink { AccountsView() } label: { Label("Accounts", systemImage: "building.columns") }
                 NavigationLink { BudgetsView() } label: { Label("Budgets", systemImage: "chart.pie") }
                 NavigationLink { GoalsView() } label: { Label("Goals", systemImage: "target") }
+                NavigationLink { ExportView() } label: { Label("Export", systemImage: "square.and.arrow.up") }
             }
             Section("Development") {
                 Button("Restart onboarding") { showsResetConfirmation = true }.foregroundStyle(AppTheme.expense)
