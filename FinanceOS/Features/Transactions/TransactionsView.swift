@@ -23,6 +23,10 @@ struct TransactionsView: View {
                                 viewModel.delete(transaction, using: modelContext)
                             }
                         }
+                        .swipeActions(edge: .leading, allowsFullSwipe: false) {
+                            Button("Edit", systemImage: "pencil") { viewModel.editingTransaction = transaction }
+                                .tint(AppTheme.primary)
+                        }
                 }
             }
         }
@@ -40,9 +44,26 @@ struct TransactionsView: View {
                 .padding(.horizontal, 24).padding(.vertical, 12).background(.ultraThinMaterial)
         }
         .sheet(isPresented: $viewModel.showsAddTransaction) { AddTransactionView() }
+        .sheet(item: $viewModel.editingTransaction) { transaction in AddTransactionView(transaction: transaction) }
         .alert("Something needs attention", isPresented: Binding(get: { viewModel.errorMessage != nil }, set: { if !$0 { viewModel.errorMessage = nil } })) {
             Button("OK", role: .cancel) { viewModel.errorMessage = nil }
         } message: { Text(viewModel.errorMessage ?? "") }
+        .overlay(alignment: .bottom) {
+            if viewModel.undoableTransaction != nil {
+                HStack {
+                    Text("Transaction deleted")
+                    Spacer()
+                    Button("Undo") { viewModel.undoDelete(using: modelContext) }.fontWeight(.bold)
+                }
+                .padding().background(AppTheme.surface, in: Capsule()).shadow(radius: 8)
+                .padding(.bottom, 92).padding(.horizontal, 24)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+                .task(id: viewModel.undoableTransaction?.id) {
+                    try? await Task.sleep(for: .seconds(10))
+                    viewModel.undoableTransaction = nil
+                }
+            }
+        }
     }
 }
 
@@ -117,9 +138,23 @@ struct AddTransactionView: View {
     @State private var notes = ""
     @State private var errorMessage: String?
     private let service = TransactionService()
+    private let existingTransaction: FinancialTransaction?
 
     init(initialType: TransactionType = .expense) {
+        existingTransaction = nil
         _type = State(initialValue: initialType)
+    }
+
+    init(transaction: FinancialTransaction) {
+        existingTransaction = transaction
+        _type = State(initialValue: transaction.type)
+        _amountText = State(initialValue: transaction.amount.description)
+        _sourceAccountID = State(initialValue: transaction.sourceAccount?.id)
+        _destinationAccountID = State(initialValue: transaction.destinationAccount?.id)
+        _categoryID = State(initialValue: transaction.category?.id)
+        _selectedLabelIDs = State(initialValue: Set(transaction.labels.map(\.id)))
+        _date = State(initialValue: transaction.date)
+        _notes = State(initialValue: transaction.notes)
     }
 
     private var activeAccounts: [Account] { accounts.filter { !$0.isArchived } }
@@ -172,7 +207,7 @@ struct AddTransactionView: View {
                     TextField("Note (optional)", text: $notes, axis: .vertical).lineLimit(2...4)
                 }
             }
-            .navigationTitle("Add Transaction")
+            .navigationTitle(existingTransaction == nil ? "Add Transaction" : "Edit Transaction")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel", action: dismiss.callAsFunction) }
                 ToolbarItem(placement: .confirmationAction) { Button("Save", action: save).fontWeight(.semibold) }
@@ -208,7 +243,11 @@ struct AddTransactionView: View {
         let amount = Decimal(string: amountText) ?? 0
         do {
             let selectedLabels = labels.filter { selectedLabelIDs.contains($0.id) }
-            try service.create(type: type, amount: amount, currencyCode: currencyCode, date: date, notes: notes, sourceAccount: sourceAccount, destinationAccount: destinationAccount, category: category, labels: selectedLabels, in: modelContext)
+            if let existingTransaction {
+                try service.update(existingTransaction, type: type, amount: amount, currencyCode: currencyCode, date: date, notes: notes, sourceAccount: sourceAccount, destinationAccount: destinationAccount, category: category, labels: selectedLabels, in: modelContext)
+            } else {
+                try service.create(type: type, amount: amount, currencyCode: currencyCode, date: date, notes: notes, sourceAccount: sourceAccount, destinationAccount: destinationAccount, category: category, labels: selectedLabels, in: modelContext)
+            }
             dismiss()
         } catch {
             errorMessage = error.localizedDescription

@@ -54,4 +54,37 @@ final class TransactionServiceTests: XCTestCase {
         XCTAssertEqual(bank.currentBalance, 1_250)
         XCTAssertEqual(fund.currentBalance, 1_250)
     }
+
+    func testUpdateReversesOldBalanceImpactBeforeApplyingNewValue() throws {
+        let container = PersistenceController.previewContainer()
+        let context = container.mainContext
+        let bank = Account(name: "Bank", type: .bank, openingBalance: 1_000)
+        let food = Category(name: "Food", iconName: "fork.knife", colorHex: "#EF4444")
+        context.insert(bank); context.insert(food); try context.save()
+        let service = TransactionService()
+        try service.create(type: .expense, amount: 100, currencyCode: "INR", date: .now, notes: "", sourceAccount: bank, destinationAccount: nil, category: food, in: context)
+        let transaction = try XCTUnwrap(context.fetch(FetchDescriptor<FinancialTransaction>()).first)
+
+        try service.update(transaction, type: .expense, amount: 250, currencyCode: "INR", date: .now, notes: "Updated", sourceAccount: bank, destinationAccount: nil, category: food, labels: [], in: context)
+
+        XCTAssertEqual(bank.currentBalance, 750)
+        XCTAssertEqual(transaction.amount, 250)
+    }
+
+    func testRestoreReappliesSoftDeletedTransaction() throws {
+        let container = PersistenceController.previewContainer()
+        let context = container.mainContext
+        let bank = Account(name: "Bank", type: .bank, openingBalance: 1_000)
+        let food = Category(name: "Food", iconName: "fork.knife", colorHex: "#EF4444")
+        context.insert(bank); context.insert(food); try context.save()
+        let service = TransactionService()
+        try service.create(type: .expense, amount: 100, currencyCode: "INR", date: .now, notes: "", sourceAccount: bank, destinationAccount: nil, category: food, in: context)
+        let transaction = try XCTUnwrap(context.fetch(FetchDescriptor<FinancialTransaction>()).first)
+        try service.softDelete(transaction, in: context)
+
+        try service.restore(transaction, in: context)
+
+        XCTAssertTrue(transaction.isActive)
+        XCTAssertEqual(bank.currentBalance, 900)
+    }
 }
