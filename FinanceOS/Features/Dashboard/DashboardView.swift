@@ -7,6 +7,8 @@ struct DashboardView: View {
     @Query(sort: \Budget.createdAt, order: .reverse) private var budgets: [Budget]
     @Query(sort: \Goal.deadline) private var goals: [Goal]
 
+    private var insights: [FinancialInsight] { InsightEngine.generate(budgets: budgets, goals: goals, transactions: transactions) }
+
     private var summary: FinancialSummary { AnalyticsService.summary(accounts: accounts, transactions: transactions, range: Calendar.current.dateInterval(of: .month, for: .now)) }
 
     var body: some View {
@@ -18,6 +20,12 @@ struct DashboardView: View {
                     summaryGrid.padding(.horizontal, 24)
                     if let budget = budgets.first(where: { !$0.isArchived }) { budgetCard(budget).padding(.horizontal, 24) }
                     if let goal = goals.first(where: { $0.status == .active }) { goalCard(goal).padding(.horizontal, 24) }
+                    if let insight = insights.first {
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("Insight").font(.title3.bold())
+                            InsightCard(insight: insight)
+                        }.padding(.horizontal, 24)
+                    }
                     recentTransactions
                 }.padding(.vertical, 12)
             }
