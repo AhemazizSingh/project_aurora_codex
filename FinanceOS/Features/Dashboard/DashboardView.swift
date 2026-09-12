@@ -11,10 +11,12 @@ struct DashboardView: View {
             .navigationTitle("FinanceOS")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    NavigationLink { TransactionsView() } label: {
-                        Image(systemName: "arrow.left.arrow.right.circle")
+                    HStack(spacing: 16) {
+                        NavigationLink { TransactionsView() } label: { Image(systemName: "arrow.left.arrow.right.circle") }
+                            .accessibilityLabel("Transactions")
+                        NavigationLink { CategoriesView() } label: { Image(systemName: "square.grid.2x2") }
+                            .accessibilityLabel("Categories")
                     }
-                    .accessibilityLabel("Transactions")
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     NavigationLink { AccountsView() } label: {

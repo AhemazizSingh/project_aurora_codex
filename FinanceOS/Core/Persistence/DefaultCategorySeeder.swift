@@ -13,7 +13,9 @@ enum DefaultCategorySeeder {
             ("Education", "book.fill", "#6366F1"),
             ("Other", "ellipsis.circle.fill", "#64748B")
         ]
-        definitions.forEach { context.insert(Category(name: $0.0, iconName: $0.1, colorHex: $0.2)) }
+        definitions.enumerated().forEach { index, definition in
+            context.insert(Category(name: definition.0, iconName: definition.1, colorHex: definition.2, displayOrder: index))
+        }
         try context.save()
     }
 }
