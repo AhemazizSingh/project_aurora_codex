@@ -13,6 +13,8 @@ final class FinancialTransaction {
     var deletedAt: Date?
     var createdAt: Date
     var updatedAt: Date
+    /// Groups transactions created by one import so the whole import can be undone safely.
+    var importSessionID: String?
     var sourceAccount: Account?
     var destinationAccount: Account?
     var category: Category?

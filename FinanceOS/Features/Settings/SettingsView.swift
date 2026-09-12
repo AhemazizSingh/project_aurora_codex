@@ -31,6 +31,7 @@ struct SettingsView: View {
                 NavigationLink { BudgetsView() } label: { Label("Budgets", systemImage: "chart.pie") }
                 NavigationLink { GoalsView() } label: { Label("Goals", systemImage: "target") }
                 NavigationLink { ExportView() } label: { Label("Export", systemImage: "square.and.arrow.up") }
+                NavigationLink { ImportView() } label: { Label("Import CSV", systemImage: "square.and.arrow.down") }
                 NavigationLink { RecurringTransactionsView() } label: { Label("Recurring transactions", systemImage: "repeat") }
             }
             Section("Development") {

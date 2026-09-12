@@ -16,6 +16,7 @@ final class TransactionService {
         destinationAccount: Account?,
         category: Category?,
         labels: [TransactionLabel] = [],
+        importSessionID: String? = nil,
         in context: ModelContext
     ) throws {
         let transaction = FinancialTransaction(type: type, amount: amount, currencyCode: currencyCode, date: date, notes: notes)
@@ -23,6 +24,7 @@ final class TransactionService {
         transaction.destinationAccount = destinationAccount
         transaction.category = category
         transaction.labels = labels
+        transaction.importSessionID = importSessionID
         try engine.apply(transaction)
         context.insert(transaction)
         do {
