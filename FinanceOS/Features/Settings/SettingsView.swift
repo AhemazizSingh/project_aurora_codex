@@ -31,6 +31,7 @@ struct SettingsView: View {
                 NavigationLink { BudgetsView() } label: { Label("Budgets", systemImage: "chart.pie") }
                 NavigationLink { GoalsView() } label: { Label("Goals", systemImage: "target") }
                 NavigationLink { ExportView() } label: { Label("Export", systemImage: "square.and.arrow.up") }
+                NavigationLink { RecurringTransactionsView() } label: { Label("Recurring transactions", systemImage: "repeat") }
             }
             Section("Development") {
                 Button("Restart onboarding") { showsResetConfirmation = true }.foregroundStyle(AppTheme.expense)
